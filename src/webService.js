@@ -3,6 +3,7 @@ const configs = require('./configs');
 const mongoose = require('mongoose');
 const FormDescriptor = require('./models/formDescriptor')
 const Polygon = require('./models/polygon')
+const cors = require('cors')
 
 mongoose.connect(configs.DATABASE_URL, {useUnifiedTopology: true, useNewUrlParser: true}, (error => {
     if(error)
@@ -22,6 +23,8 @@ app.use(express.urlencoded({
 }));
 
 app.use(express.json());
+
+app.use(cors());
 
 app.get('/form_descriptors', (req, res) => {
 
