@@ -7,7 +7,7 @@ const FormDescriptor = new Schema({
     fields: [{  name : {type:String, trim:true, default:''},
                 title : {type:String, trim:true, default:''},
                 type : {type:String, enum:{values:["text", "number", "location", "date"], message:"incorrect type"}, trim:true, default:'', },
-                required : {type:Boolean, default:false},
+                required : {type:Boolean, default:true},
                 options : [{
                             label : {type:String, trim:true, default:''},
                             value : {type:Schema.Types.Mixed}

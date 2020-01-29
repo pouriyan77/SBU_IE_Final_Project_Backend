@@ -48,7 +48,8 @@ app.post('/form_descriptors', (req, res) => {
         res.status(400).json({
 			result: 'failure',
 			data: 'empty form title'
-		})
+        })
+        next()
     }
 
     FormDescriptor.create(req.body)
@@ -128,15 +129,17 @@ app.post('/areas', (req, res) => {
         res.status(400).json({
 			result: 'failure',
 			data: 'geometry is empty'
-		})
+        })
+        next();
     }
     const coordinates = geometry.coordinates[0]
-    if(coordinates == null || coordinates.length < 3)
+    if(coordinates == null || coordinates.length < 4)
     {
         res.status(400).json({
 			result: 'failure',
-			data: 'coordinates must have three points at least'
-		})
+			data: 'coordinates must have four points at least'
+        })
+        next();
     }
 
 	Polygon.create(req.body)
@@ -165,7 +168,8 @@ app.put('/areas', (req, res) => {
         res.status(400).json({
 			result: 'failure',
 			data: "new name required"
-		})
+        })
+        next();
     }
     const newName = { $set: { properties: req.query }};
 	Polygon.findByIdAndUpdate(id, newName, {new:true})
@@ -199,6 +203,13 @@ app.delete('/areas', (req, res) => {
 			data: err.message
 		})
 	})
+})
+
+app.post('/forms', (req, res) => {
+
+    console.log(req.body);
+    console.log("SALAM");
+    res.send("SALAM ASSISAM")
 })
 
 let port = process.env.PORT || configs.PORT
