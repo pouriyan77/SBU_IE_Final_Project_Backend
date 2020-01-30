@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const FormDescriptor = require('./models/formDescriptor')
 const Polygon = require('./models/polygon')
 const cors = require('cors')
+const pointInPolygon = require('point-in-polygon')
 
 mongoose.connect(configs.DATABASE_URL, {useUnifiedTopology: true, useNewUrlParser: true}, (error => {
     if(error)
@@ -234,19 +235,60 @@ app.post('/forms', (req, res) => {
     console.log(req.body)
     console.log(parentId)
     req.body['_id'] = mongoose.Types.ObjectId()
-    FormDescriptor.findByIdAndUpdate(parentId, {'$addToSet': {'filledForms': req.body}} ,{new:true})
-    .then((formDescriptor) => {
-        res.json({
-			result: 'success',
-			data: [formDescriptor]
-		})
-    })
-    .catch((err) => {
-        res.status(400).json({
-			result: 'failure',
-			data: err.message
-		})
-    })
+
+    let filledFields = req.body['filledFields']
+
+    let allPolygons = undefined
+    Polygon.find()
+        .then(polygons => {
+            allPolygons = polygons
+
+            for(key in filledFields)
+            {
+                let value = filledFields[key]
+                // console.log(filledFields)
+                // console.log(key)
+                // console.log(value)
+                if(value['lat'] !== undefined)
+                {
+                    let areas = value.areas
+                    for(let polygon of allPolygons)
+                    {
+                        let coordinates = polygon.geometry.coordinates[0]
+                        if(pointInPolygon([value.lon, value.lat], coordinates))
+                        {
+                            areas.push(polygon.properties.name)
+                        }
+                    }
+                    console.log(areas)
+                }
+                
+            }
+
+            FormDescriptor.findByIdAndUpdate(parentId, {'$addToSet': {'filledForms': req.body}} ,{new:true})
+                .then((formDescriptor) => {
+                    res.json({
+                        result: 'success',
+                        data: [formDescriptor]
+                    })
+                })
+                .catch((err) => {
+                    console.log("gjdhfgdsfudhsj")
+                    res.status(400).json({
+                        result: 'failure',
+                        data: err.message
+                    })
+                })
+
+        })
+        .catch(err => {
+            res.status(400).json({
+                result: 'failure',
+                data: err.message
+            })
+            return
+        })
+
 })
 
 app.get('/forms/:id', (req, res) => {
