@@ -27,6 +27,11 @@ app.use(express.json());
 
 app.use(cors());
 
+app.get('/', (req, res) => {
+
+	res.send("WLCOME TO CRISIS MANAGING APP")
+})
+
 app.get('/form_descriptors', (req, res) => {
 
 	FormDescriptor.find({}, {filledForms:0})
