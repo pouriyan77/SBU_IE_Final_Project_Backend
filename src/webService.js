@@ -28,7 +28,7 @@ app.use(cors());
 
 app.get('/form_descriptors', (req, res) => {
 
-	FormDescriptor.find()
+	FormDescriptor.find({}, {filledForms:0})
 	.then(formDescriptors => {
 		res.json({
 			result: 'success',
@@ -43,6 +43,24 @@ app.get('/form_descriptors', (req, res) => {
 	})
 })
 
+app.get('/form_descriptors/:id', (req, res) => {
+    const id = req.params.id
+
+	FormDescriptor.findById(id, {filledForms:0})
+	.then(formDescriptor => {
+		res.json({
+			result: 'success',
+			data: [formDescriptor]
+		})
+	})
+	.catch(err => {
+		res.json({
+			result: 'fail',
+			data: 'Form Descritor ' + id + ' not found.'
+		})
+    })
+})
+
 app.post('/form_descriptors', (req, res) => {
 
     const title = req.body.title
@@ -54,6 +72,8 @@ app.post('/form_descriptors', (req, res) => {
         })
         next()
     }
+    
+    // FormDescriptor.updateOne({id = "sdhgdwej342"}, )
 
     FormDescriptor.create(req.body)
 	.then(formDescriptor => {
@@ -210,9 +230,41 @@ app.delete('/areas', (req, res) => {
 
 app.post('/forms', (req, res) => {
 
-    console.log(req.body);
-    console.log("SALAM");
-    res.send("SALAM ASSISAM")
+    let parentId = req.body.parentId
+    console.log(req.body)
+    console.log(parentId)
+    req.body['_id'] = mongoose.Types.ObjectId()
+    FormDescriptor.findByIdAndUpdate(parentId, {'$addToSet': {'filledForms': req.body}} ,{new:true})
+    .then((formDescriptor) => {
+        res.json({
+			result: 'success',
+			data: [formDescriptor]
+		})
+    })
+    .catch((err) => {
+        res.status(400).json({
+			result: 'failure',
+			data: err.message
+		})
+    })
+})
+
+app.get('/forms/:id', (req, res) => {
+    id = req.params.id
+
+    FormDescriptor.findById(id)
+	.then(formDescriptor => {
+		res.json({
+			result: 'success',
+			data: formDescriptor
+		})
+	})
+	.catch(err => {
+		res.json({
+			result: 'fail',
+			data: 'Form Descriptor ' + id + ' not found.'
+		})
+    })
 })
 
 let port = process.env.PORT || configs.PORT
