@@ -260,7 +260,7 @@ app.post('/forms', (req, res) => {
                             areas.push(polygon.properties.name)
                         }
                     }
-                    console.log(areas)
+                    // console.log(areas)
                 }
                 
             }
